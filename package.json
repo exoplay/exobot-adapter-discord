@@ -1,8 +1,8 @@
 {
   "name": "@exoplay/exobot-adapter-discord",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "exobot adapter for discord",
-  "main": "index.js",
+  "main": "discord.js",
   "scripts": {
     "test": "blueprints -t",
     "build": "blueprints -p",
