@@ -1,6 +1,6 @@
 {
   "name": "@exoplay/exobot-adapter-discord",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "exobot adapter for discord",
   "main": "discord.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "discord"
   ],
   "author": "Jack Lawson <ajacksified@gmail.com>",
-  "license": "MIT",
+  "license": "LGPL",
   "bugs": {
     "url": "https://github.com/exoplay/exobot-adapter-discord/issues"
   },
