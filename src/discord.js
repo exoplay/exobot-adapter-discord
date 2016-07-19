@@ -1,13 +1,15 @@
-import Discord from 'discord.io';
+import Discord from 'discord.js';
 
 import { Adapter, User } from '@exoplay/exobot';
 
 export const EVENTS = {
   ready: 'discordReady',
   message: 'discordMessage',
-  presence: 'discordPresence',
+  //presence: 'discordPresence',
   disconnected: 'discordDisconnected',
 };
+
+export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
 
 export default class DiscordAdapter extends Adapter {
   channels = {}
@@ -32,8 +34,8 @@ export default class DiscordAdapter extends Adapter {
     }
 
     this.client = new Discord.Client({
-      token,
-      autorun: true,
+      autoReconnect: true,
+
     });
 
     Object.keys(EVENTS).forEach(discordEvent => {
@@ -43,15 +45,18 @@ export default class DiscordAdapter extends Adapter {
         this.bot.emitter.emit(`discord-${discordEvent}`, ...args);
       });
     });
+
+    this.client.loginWithToken(token);
   }
 
   send (message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
 
-    this.client.sendMessage({
-      to: message.channel,
-      message: message.text,
-    });
+    this.client.stopTyping(channel);
+    this.client.sendMessage(
+      message.channel,
+      message.text
+    );
   }
 
   discordReady = () => {
@@ -59,10 +64,9 @@ export default class DiscordAdapter extends Adapter {
 
     this.bot.emitter.emit('connected', this.id);
     this.bot.log.notice('Connected to Discord.');
-
-    this.client.setPresence({
-      game: 'Exobotting',
-    });
+    this.client.setPlayingGame('Exobotting');
+    // set nickname to this.bot.name
+    //this.client.setNickname(
   }
 
   discordDisconnected = () => {
@@ -70,17 +74,19 @@ export default class DiscordAdapter extends Adapter {
     this.bot.log.critical('Disconnected from Discord.');
   }
 
-  discordMessage (username, userId, channel, text/*, rawEvent*/) {
-    if (username === this.username) { return; }
+  discordMessage ({ channel, server, author, cleanContent }) {
+    if (author.username === this.username) { return; }
 
-    const user = new User(username, userId);
+    this.client.startTyping(channel);
+
+    const user = new User(author.username, author.id);
 
     // if it's a whisper, the channel is in directMessages
-    if (this.client.directMessages[channel]) {
-      return super.receiveWhisper({ user, text, channel });
+    if (channel instanceof Discord.TextChannel) {
+      return super.receiveWhisper({ user, text: message, channel });
     }
 
-    this.receive({ user, text, channel });
+    this.receive({ user, text: cleanContent, channel });
   }
 
   discordPresence (username, userId, status, gameName, rawEvent) {

@@ -1,6 +1,6 @@
 {
   "name": "@exoplay/exobot-adapter-discord",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "exobot adapter for discord",
   "main": "discord.js",
   "scripts": {
@@ -26,7 +26,7 @@
   "homepage": "https://github.com/exoplay/exobot-adapter-discord#readme",
   "dependencies": {
     "@r/build": "git://github.com/ajacksified/node-build#679c3f3d47c0916237d55128ece4cc817b489ef8",
-    "discord.io": "^1.13.4"
+    "discord.js": "^8.0.0"
   },
   "peerDependencies": {
     "@exoplay/exobot": "~1.0.0"
