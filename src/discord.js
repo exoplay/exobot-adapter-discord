@@ -11,7 +11,7 @@ export const EVENTS = {
 
 export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
 
-export default class DiscordAdapter extends Adapter {
+export class DiscordAdapter extends Adapter {
   channels = {}
 
   constructor ({ token, botId, username }) {
