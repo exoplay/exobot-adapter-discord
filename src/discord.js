@@ -52,7 +52,6 @@ export class DiscordAdapter extends Adapter {
   send (message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
 
-    this.client.stopTyping(message.channel);
     this.client.sendMessage(
       message.channel,
       message.text
@@ -75,19 +74,19 @@ export class DiscordAdapter extends Adapter {
 
   discordMessage ({ channel, server, author, cleanContent }) {
     if (author.username === this.username) { return; }
-
-    this.client.startTyping(channel);
+    console.log(cleanContent);
 
     const user = new User(author.username, author.id);
 
     // if it's a whisper, the channel is in directMessages
-    if (channel instanceof Discord.TextChannel) {
-      return super.receiveWhisper({ user, text: message, channel });
+    if (channel instanceof Discord.PMChannel) {
+      return super.receiveWhisper({ user, text: cleanContent, channel });
     }
 
     this.receive({ user, text: cleanContent, channel });
   }
 
+  /*
   discordPresence (username, userId, status, gameName, rawEvent) {
     if (userId !== this.botId) {
       const user = new User(username, userId);
@@ -99,4 +98,5 @@ export class DiscordAdapter extends Adapter {
       }
     }
   }
+  */
 }
