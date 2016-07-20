@@ -52,7 +52,7 @@ export class DiscordAdapter extends Adapter {
   send (message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
 
-    this.client.stopTyping(channel);
+    this.client.stopTyping(message.channel);
     this.client.sendMessage(
       message.channel,
       message.text
@@ -65,8 +65,7 @@ export class DiscordAdapter extends Adapter {
     this.bot.emitter.emit('connected', this.id);
     this.bot.log.notice('Connected to Discord.');
     this.client.setPlayingGame('Exobotting');
-    // set nickname to this.bot.name
-    //this.client.setNickname(
+    //this.client.setNickname(this.bot.name);
   }
 
   discordDisconnected = () => {
