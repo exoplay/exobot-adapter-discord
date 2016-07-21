@@ -58,13 +58,22 @@ export class DiscordAdapter extends Adapter {
     );
   }
 
+  getUserIdByUserName (name) {
+    try {
+      return this.client.users.get('username', new RegExp(name, 'i')).id;
+    } catch (e) { }
+  }
+
   discordReady = () => {
     this.status = Adapter.STATUS.CONNECTED;
 
     this.bot.emitter.emit('connected', this.id);
     this.bot.log.notice('Connected to Discord.');
     this.client.setPlayingGame('Exobotting');
-    //this.client.setNickname(this.bot.name);
+
+    this.client.servers.forEach(s => {
+      this.client.setNickname(s, this.bot.name);
+    });
   }
 
   discordDisconnected = () => {
