@@ -1,6 +1,6 @@
 {
   "name": "@exoplay/exobot-adapter-discord",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "exobot adapter for discord",
   "main": "discord.js",
   "scripts": {
@@ -29,6 +29,6 @@
     "discord.js": "^8.0.0"
   },
   "peerDependencies": {
-    "@exoplay/exobot": "^1.2"
+    "@exoplay/exobot": "2.x"
   }
 }
