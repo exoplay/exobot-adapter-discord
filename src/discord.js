@@ -12,7 +12,9 @@ export const EVENTS = {
 export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
 
 export class DiscordAdapter extends Adapter {
-  channels = {}
+  name = 'discord';
+
+  channels = {};
 
   constructor ({ token, botId, username }) {
     super(...arguments);
@@ -59,9 +61,7 @@ export class DiscordAdapter extends Adapter {
   }
 
   getUserIdByUserName (name) {
-    try {
-      return this.client.users.get('username', new RegExp(name, 'i')).id;
-    } catch (e) { }
+    return this.client.users.get('username', new RegExp(name, 'i')).id;
   }
 
   discordReady = () => {
