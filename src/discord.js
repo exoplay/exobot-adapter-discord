@@ -79,7 +79,8 @@ export class DiscordAdapter extends Adapter {
 
   discordMessage ({ channel, guild, author, content }) {
     if (author.username === this.username) { return; }
-      const user = new User(author.username, author.id);
+
+    const user = new User(author.username, author.id);
 
     // if it's a whisper, the channel is in directMessages
     if (channel.type === 'dm') {

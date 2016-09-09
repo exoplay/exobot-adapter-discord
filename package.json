@@ -4,9 +4,8 @@
   "description": "exobot adapter for discord",
   "main": "discord.js",
   "scripts": {
-    "test": "blueprints -t",
-    "build": "blueprints -p",
-    "watch": "blueprints -p -w"
+    "build": "exobot-build",
+    "watch": "exobot-build --watch"
   },
   "repository": {
     "type": "git",
@@ -29,6 +28,9 @@
     "discord.js": "^9.0.0"
   },
   "peerDependencies": {
-    "@exoplay/exobot": "2.x"
+    "@exoplay/exobot": ">= 2.3"
+  },
+  "devDependencies": {
+    "@exoplay/exobot": ">= 2.3"
   }
 }
