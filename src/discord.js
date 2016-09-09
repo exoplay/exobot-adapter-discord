@@ -6,7 +6,7 @@ export const EVENTS = {
   ready: 'discordReady',
   message: 'discordMessage',
   //presence: 'discordPresence',
-  disconnected: 'discordDisconnected',
+  reconnecting: 'discordReconnecting',
 };
 
 export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
@@ -35,11 +35,7 @@ export class DiscordAdapter extends Adapter {
       return;
     }
 
-    this.client = new Discord.Client({
-      autoReconnect: true,
-
-    });
-
+    this.client = new Discord.Client();
     Object.keys(EVENTS).forEach(discordEvent => {
       const mappedFn = this[EVENTS[discordEvent]];
       this.client.on(discordEvent, (...args) => mappedFn.bind(this)(...args));
@@ -48,20 +44,20 @@ export class DiscordAdapter extends Adapter {
       });
     });
 
-    this.client.loginWithToken(token);
+    this.client.login(token);
   }
 
   send (message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
-
-    this.client.sendMessage(
+    message.channel.sendMessage(message.text);
+    /*this.client.sendMessage(
       message.channel,
       message.text
-    );
+    );*/
   }
 
   getUserIdByUserName (name) {
-    return this.client.users.get('username', new RegExp(name, 'i')).id;
+    return this.client.users.find('username',name).id;
   }
 
   discordReady = () => {
@@ -69,30 +65,28 @@ export class DiscordAdapter extends Adapter {
 
     this.bot.emitter.emit('connected', this.id);
     this.bot.log.notice('Connected to Discord.');
-    this.client.setPlayingGame('Exobotting');
+    this.client.user.game = 'Exobotting';
 
-    this.client.servers.forEach(s => {
-      this.client.setNickname(s, this.bot.name);
+    this.client.guilds.forEach(s => {
+      s.member(this.client.user).nickname = this.bot.name;
     });
   }
 
-  discordDisconnected = () => {
+  discordReconnecting = () => {
     this.status = Adapter.STATUS.DISCONNECTED;
-    this.bot.log.critical('Disconnected from Discord.');
+    this.bot.log.critical('Reconnecting to Discord.');
   }
 
-  discordMessage ({ channel, server, author, cleanContent }) {
+  discordMessage ({ channel, guild, author, content }) {
     if (author.username === this.username) { return; }
-    console.log(cleanContent);
-
-    const user = new User(author.username, author.id);
+      const user = new User(author.username, author.id);
 
     // if it's a whisper, the channel is in directMessages
-    if (channel instanceof Discord.PMChannel) {
-      return super.receiveWhisper({ user, text: cleanContent, channel });
+    if (channel.type === 'dm') {
+      return super.receiveWhisper({ user, text: content, channel });
     }
 
-    this.receive({ user, text: cleanContent, channel });
+    this.receive({ user, text: content, channel });
   }
 
   /*
