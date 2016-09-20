@@ -76,14 +76,15 @@ export class DiscordAdapter extends Adapter {
   }
 
   getRolesForUser (userId) {
+    const roles = [];
     if (this.adapterUsers[userId]) {
-      return this.adapterUsers[userId].roles.map( (role) => {
+      this.adapterUsers[userId].roles.map(role => {
         if (this.roleMapping[role]) {
-          return this.roleMapping[role];
+          roles.push(this.roleMapping[role]);
         }});
     }
 
-    return [];
+    return roles;
   }
 
   discordReady = () => {
