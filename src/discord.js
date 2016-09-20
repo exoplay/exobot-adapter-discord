@@ -54,13 +54,13 @@ export class DiscordAdapter extends Adapter {
   async getUserIdByUserName (name) {
     const user = this.client.users.find('username',name);
     if (user) {
-      let botuser;
+      let botUser;
       try {
-      botuser = await this.getUser(user.id, user.username, user);
+      botUser = await this.getUser(user.id, user.username, user);
       } catch (err) {
-        console.log(err);
+        this.bot.log.warn(err);
       }
-      return botuser.id;
+      return botUser.id;
     } else {
       return;
     }
@@ -105,9 +105,9 @@ export class DiscordAdapter extends Adapter {
 
   async discordMessage ({ channel, guild, author, content, member }) {
     if (author.username === this.username) { return; }
-    console.log(content);
+    this.bot.log.debug(content);
 
-    const user = await this.getUser(author.id, author.username, member || author)
+    const user = await this.getUser(author.id, author.username, member || author);
 
       // if it's a whisper, the channel is in directMessages
     if (channel.type === 'dm') {
@@ -117,14 +117,14 @@ export class DiscordAdapter extends Adapter {
     this.receive({ user, text: content, channel });
   }
 
-  getRoles(adapterUserId, adapterUser, roles) {
+  getRoles(adapterUserId, adapterUser) {
+    const roles = [];
     if (adapterUser.roles) {
       adapterUser.roles.map((role) => {
-        if (role.name !== '@everyone') {
-          roles.push(role.name)
-        }
+        roles.push(role.name);
       });
-      return true;
+
+      return roles;
     }
 
     return false;
