@@ -16,9 +16,9 @@ export class DiscordAdapter extends Adapter {
 
   channels = {};
 
-  constructor ({ token, botId, username }) {
+  constructor ({ token, botId, username, adapterName, roleMapping }) {
     super(...arguments);
-
+    this.name = adapterName || this.name;
     this.botId = botId;
     this.username = username;
     this.token = token;
@@ -26,7 +26,6 @@ export class DiscordAdapter extends Adapter {
 
   register (bot) {
     super.register(...arguments);
-
     const { token, botId, username } = this;
 
     if (!token || !botId || !username) {
@@ -50,20 +49,46 @@ export class DiscordAdapter extends Adapter {
   send (message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
     message.channel.sendMessage(message.text);
-    /*this.client.sendMessage(
-      message.channel,
-      message.text
-    );*/
   }
 
-  getUserIdByUserName (name) {
-    return this.client.users.find('username',name).id;
+  async getUserIdByUserName (name) {
+    const user = this.client.users.find('username',name);
+    if (user) {
+      let botUser;
+      try {
+        botUser = await this.getUser(user.id, user.username, user);
+      } catch (err) {
+        this.bot.log.warn(err);
+      }
+      return botUser.id;
+    } else {
+      return;
+    }
+  }
+
+  getRoleIdByRoleName (name, message) {
+    const role = message.channel.guild.roles.find('name', name);
+    if (role) {
+      return role.id;
+    }
+
+    return;
+  }
+
+  getRolesForUser (userId) {
+    if (this.roleMapping && this.adapterUsers && this.adapterUsers[userId]) {
+      return this.adapterUsers[userId].roles
+        .filter(role => this.roleMapping[role])
+        .map(role => this.roleMapping[role]);
+    }
+
+    return [];
   }
 
   discordReady = () => {
     this.status = Adapter.STATUS.CONNECTED;
 
-    this.bot.emitter.emit('connected', this.id);
+    this.bot.emitter.emit('connected', this.name);
     this.bot.log.notice('Connected to Discord.');
     this.client.user.game = 'Exobotting';
 
@@ -77,10 +102,11 @@ export class DiscordAdapter extends Adapter {
     this.bot.log.critical('Reconnecting to Discord.');
   }
 
-  discordMessage ({ channel, guild, author, content }) {
+  async discordMessage ({ channel, guild, author, content, member }) {
     if (author.username === this.username) { return; }
+    this.bot.log.debug(content);
 
-    const user = new User(author.username, author.id);
+    const user = await this.getUser(author.id, author.username, member || author);
 
     // if it's a whisper, the channel is in directMessages
     if (channel.type === 'dm') {
@@ -88,6 +114,14 @@ export class DiscordAdapter extends Adapter {
     }
 
     this.receive({ user, text: content, channel });
+  }
+
+  getRoles(adapterUserId, adapterUser) {
+    if (adapterUser.roles) {
+      return adapterUser.roles.map(role => role.name);
+    }
+
+    return false;
   }
 
   /*
