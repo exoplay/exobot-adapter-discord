@@ -56,7 +56,7 @@ export class DiscordAdapter extends Adapter {
     if (user) {
       let botUser;
       try {
-      botUser = await this.getUser(user.id, user.username, user);
+        botUser = await this.getUser(user.id, user.username, user);
       } catch (err) {
         this.bot.log.warn(err);
       }
@@ -76,15 +76,13 @@ export class DiscordAdapter extends Adapter {
   }
 
   getRolesForUser (userId) {
-    const roles = [];
-    if (this.adapterUsers[userId]) {
-      this.adapterUsers[userId].roles.map(role => {
-        if (this.roleMapping[role]) {
-          roles.push(this.roleMapping[role]);
-        }});
+    if (this.roleMapping && this.adapterUsers && this.adapterUsers[userId]) {
+      return this.adapterUsers[userId].roles
+        .filter(role => this.roleMapping[role])
+        .map(role => this.roleMapping[role]);
     }
 
-    return roles;
+    return [];
   }
 
   discordReady = () => {
@@ -110,7 +108,7 @@ export class DiscordAdapter extends Adapter {
 
     const user = await this.getUser(author.id, author.username, member || author);
 
-      // if it's a whisper, the channel is in directMessages
+    // if it's a whisper, the channel is in directMessages
     if (channel.type === 'dm') {
       return super.receiveWhisper({ user, text: content, channel });
     }
@@ -119,13 +117,8 @@ export class DiscordAdapter extends Adapter {
   }
 
   getRoles(adapterUserId, adapterUser) {
-    const roles = [];
     if (adapterUser.roles) {
-      adapterUser.roles.map((role) => {
-        roles.push(role.name);
-      });
-
-      return roles;
+      return adapterUser.roles.map(role => role.name);
     }
 
     return false;
