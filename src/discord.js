@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 
-import { Adapter, User } from '@exoplay/exobot';
+import { Adapter, AdapterOperationTypes as AT } from '@exoplay/exobot';
 
 export const EVENTS = {
   ready: 'discordReady',
@@ -16,7 +16,7 @@ export default class DiscordAdapter extends Adapter {
 
   channels = {};
 
-  constructor ({ token, botId, username, adapterName, roleMapping }) {
+  constructor ({ token, botId, username, adapterName }) {
     super(...arguments);
     this.name = adapterName || this.name;
     this.botId = botId;
@@ -42,7 +42,7 @@ export default class DiscordAdapter extends Adapter {
         this.bot.emitter.emit(`discord-${discordEvent}`, ...args);
       });
     });
-
+    this.configureAdapterOperations();
     this.client.login(token);
   }
 
@@ -61,9 +61,9 @@ export default class DiscordAdapter extends Adapter {
         this.bot.log.warn(err);
       }
       return botUser.id;
-    } else {
-      return;
     }
+
+    return;
   }
 
   getRoleIdByRoleName (name, message) {
@@ -102,7 +102,7 @@ export default class DiscordAdapter extends Adapter {
     this.bot.log.critical('Reconnecting to Discord.');
   }
 
-  async discordMessage ({ channel, guild, author, content, member }) {
+  async discordMessage ({ channel, author, content, member }) {
     if (author.username === this.username) { return; }
     this.bot.log.debug(content);
 
@@ -122,6 +122,78 @@ export default class DiscordAdapter extends Adapter {
     }
 
     return false;
+  }
+
+  configureAdapterOperations() {
+    this.bot.emitter.on(AT.DISCIPLINE_USER_WARNING, this.whisperUser, this);
+    this.bot.emitter.on(AT.DISCIPLINE_USER_TEMPORARY, this.kickUser, this);
+    this.bot.emitter.on(AT.DISCIPLINE_USER_PERMANENT, this.banUser, this);
+    this.bot.emitter.on(AT.WHISPER_USER, this.whisperUser, this);
+  }
+
+  whisperUser(adapterName, options) {
+    if (!adapterName || adapterName === this.name) {
+      const adapterUserId = this.getAdapterUserIdById(options.userId);
+      if (adapterUserId) {
+        this.client.fetchUser(adapterUserId)
+          .then(user => {
+            user.sendMessage(options.messageText)
+            .catch(reason => {this.bot.log.warning(reason.response.text);});
+          });
+      }
+    }
+  }
+
+  kickUser(adapterName, options) {
+    if (!adapterName || adapterName === this.name) {
+      const adapterUserId = this.getAdapterUserIdById(options.userId);
+      if (adapterUserId) {
+        options.messageText = `You are being kicked due to ${options.messageText}`;
+        this.client.fetchUser(adapterUserId)
+          .then(user => {
+            user.sendMessage(options.messageText)
+              .then(message => {
+                this.client.guilds.map(g => {
+                  g.fetchMember(user)
+                    .then(member => {
+                      member.kick()
+                      .catch(reason => {this.bot.log.warning(reason.response.text);});
+                    })
+                    .catch(reason => {this.bot.log.warning(reason.response.text);});
+                });
+
+              })
+              .catch(reason => {this.bot.log.warning(reason.response.text);});
+          });
+      }
+
+    }
+  }
+
+  banUser(adapterName, options) {
+    if (!adapterName || adapterName === this.name) {
+      const adapterUserId = this.getAdapterUserIdById(options.userId);
+      if (adapterUserId) {
+        options.messageText = `You are being banned due to ${options.messageText}`;
+        this.client.fetchUser(adapterUserId)
+          .then(user => {
+            user.sendMessage(options.messageText)
+              .then(message => {
+                this.client.guilds.map(g => {
+                  g.fetchMember(user)
+                    .then(member => {
+                      member.ban()
+                      .catch(reason => {this.bot.log.warning(reason.response.text);});
+                    })
+                    .catch(reason => {this.bot.log.warning(reason.response.text);});
+                });
+
+              })
+              .catch(reason => {this.bot.log.warning(reason.response.text);});
+          });
+      }
+
+    }
   }
 
   /*
