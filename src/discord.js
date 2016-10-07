@@ -102,18 +102,18 @@ export default class DiscordAdapter extends Adapter {
     this.bot.log.critical('Reconnecting to Discord.');
   }
 
-  async discordMessage ({ channel, author, content, member }) {
+  async discordMessage ({ channel, author, cleanContent, member }) {
     if (author.username === this.username) { return; }
-    this.bot.log.debug(content);
+    this.bot.log.debug(cleanContent);
 
     const user = await this.getUser(author.id, author.username, member || author);
 
     // if it's a whisper, the channel is in directMessages
     if (channel.type === 'dm') {
-      return super.receiveWhisper({ user, text: content, channel });
+      return super.receiveWhisper({ user, text: cleanContent, channel });
     }
 
-    this.receive({ user, text: content, channel });
+    this.receive({ user, text: cleanContent, channel });
   }
 
   getRoles(adapterUserId, adapterUser) {
@@ -152,7 +152,7 @@ export default class DiscordAdapter extends Adapter {
         this.client.fetchUser(adapterUserId)
           .then(user => {
             user.sendMessage(options.messageText)
-              .then(message => {
+              .then(() => {
                 this.client.guilds.map(g => {
                   g.fetchMember(user)
                     .then(member => {
@@ -178,7 +178,7 @@ export default class DiscordAdapter extends Adapter {
         this.client.fetchUser(adapterUserId)
           .then(user => {
             user.sendMessage(options.messageText)
-              .then(message => {
+              .then(() => {
                 this.client.guilds.map(g => {
                   g.fetchMember(user)
                     .then(member => {
