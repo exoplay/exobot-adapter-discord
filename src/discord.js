@@ -11,8 +11,8 @@ export const EVENTS = {
 
 export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
 
-export class DiscordAdapter extends Adapter {
-  name = 'discord';
+export default class DiscordAdapter extends Adapter {
+  static type = 'discord';
 
   channels = {};
 

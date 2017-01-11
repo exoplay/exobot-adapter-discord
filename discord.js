@@ -1,3 +1,282 @@
-require("source-map-support").install();
-!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t(require("@exoplay/exobot"),require("discord.js")):"function"==typeof define&&define.amd?define(["@exoplay/exobot","discord.js"],t):"object"==typeof exports?exports["discord.js"]=t(require("@exoplay/exobot"),require("discord.js")):e["discord.js"]=t(e["@exoplay/exobot"],e["discord.js"])}(this,function(e,t){return function(e){function t(n){if(r[n])return r[n].exports;var o=r[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,t),o.l=!0,o.exports}var r={};return t.m=e,t.c=r,t.i=function(e){return e},t.d=function(e,t,r){Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:r})},t.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},t.p="",t(t.s=2)}([function(e,t){e.exports=require("@exoplay/exobot")},function(e,t){e.exports=require("discord.js")},function(e,t,r){"use strict";function n(e){return function(){var t=e.apply(this,arguments);return new Promise(function(e,r){function n(o,i){try{var u=t[o](i),a=u.value}catch(c){return void r(c)}return u.done?void e(a):Promise.resolve(a).then(function(e){return n("next",e)},function(e){return n("throw",e)})}return n("next")})}}function o(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function i(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function u(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}var a=r(1),c=a&&a.__esModule?function(){return a["default"]}:function(){return a};r.d(c,"a",c);var s=r(0),d=s&&s.__esModule?function(){return s["default"]}:function(){return s};r.d(d,"a",d),r.d(t,"EVENTS",function(){return p}),r.d(t,"DISCORD_MENTION_REGEX",function(){return h}),r.d(t,"DiscordAdapter",function(){return b});var l=function(){function e(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}return function(t,r,n){return r&&e(t.prototype,r),n&&e(t,n),t}}(),f=function y(e,t,r){null===e&&(e=Function.prototype);var n=Object.getOwnPropertyDescriptor(e,t);if(void 0===n){var o=Object.getPrototypeOf(e);return null===o?void 0:y(o,t,r)}if("value"in n)return n.value;var i=n.get;if(void 0!==i)return i.call(r)},p={ready:"discordReady",message:"discordMessage",reconnecting:"discordReconnecting"},h=/<@!(\d+)>/i,b=function(e){function t(e){var r=e.token,n=e.botId,u=e.username,a=e.adapterName;e.roleMapping;o(this,t);var c=i(this,Object.getPrototypeOf(t).apply(this,arguments));return c.name="discord",c.channels={},c.discordReady=function(){c.status=s.Adapter.STATUS.CONNECTED,c.bot.emitter.emit("connected",c.name),c.bot.log.notice("Connected to Discord."),c.client.user.game="Exobotting",c.client.guilds.forEach(function(e){e.member(c.client.user).nickname=c.bot.name})},c.discordReconnecting=function(){c.status=s.Adapter.STATUS.DISCONNECTED,c.bot.log.critical("Reconnecting to Discord.")},c.name=a||c.name,c.botId=n,c.username=u,c.token=r,c}return u(t,e),l(t,[{key:"register",value:function(e){var r=this;f(Object.getPrototypeOf(t.prototype),"register",this).apply(this,arguments);var n=this.token,o=this.botId,i=this.username;return n&&o&&i?(this.client=new c.a.Client,Object.keys(p).forEach(function(e){var t=r[p[e]];r.client.on(e,function(){return t.bind(r).apply(void 0,arguments)}),r.client.on(e,function(){for(var t,n=arguments.length,o=Array(n),i=0;i<n;i++)o[i]=arguments[i];(t=r.bot.emitter).emit.apply(t,["discord-"+e].concat(o))})}),void this.client.login(n)):(this.status=s.Adapter.STATUS.ERROR,void e.log.error("token, botId, and username are required to connect to discord."))}},{key:"send",value:function(e){this.bot.log.debug("Sending "+e.text+" to "+e.channel),e.channel.sendMessage(e.text)}},{key:"getUserIdByUserName",value:function(){function e(e){return t.apply(this,arguments)}var t=n(regeneratorRuntime.mark(function r(e){var t,n;return regeneratorRuntime.wrap(function(r){for(;;)switch(r.prev=r.next){case 0:if(t=this.client.users.find("username",e),!t){r.next=15;break}return n=void 0,r.prev=3,r.next=6,this.getUser(t.id,t.username,t);case 6:n=r.sent,r.next=12;break;case 9:r.prev=9,r.t0=r["catch"](3),this.bot.log.warn(r.t0);case 12:return r.abrupt("return",n.id);case 15:return r.abrupt("return");case 16:case"end":return r.stop()}},r,this,[[3,9]])}));return e}()},{key:"getRoleIdByRoleName",value:function(e,t){var r=t.channel.guild.roles.find("name",e);if(r)return r.id}},{key:"getRolesForUser",value:function(e){var t=this;return this.roleMapping&&this.adapterUsers&&this.adapterUsers[e]?this.adapterUsers[e].roles.filter(function(e){return t.roleMapping[e]}).map(function(e){return t.roleMapping[e]}):[]}},{key:"discordMessage",value:function(){function e(e){return r.apply(this,arguments)}var r=n(regeneratorRuntime.mark(function o(e){var r,n=e.channel,i=(e.guild,e.author),u=e.content,a=e.member;return regeneratorRuntime.wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(i.username!==this.username){e.next=2;break}return e.abrupt("return");case 2:return this.bot.log.debug(u),e.next=5,this.getUser(i.id,i.username,a||i);case 5:if(r=e.sent,"dm"!==n.type){e.next=8;break}return e.abrupt("return",f(Object.getPrototypeOf(t.prototype),"receiveWhisper",this).call(this,{user:r,text:u,channel:n}));case 8:this.receive({user:r,text:u,channel:n});case 9:case"end":return e.stop()}},o,this)}));return e}()},{key:"getRoles",value:function(e,t){return!!t.roles&&t.roles.map(function(e){return e.name})}}]),t}(s.Adapter)}])});
+require("source-map-support").install();require("regenerator-runtime/runtime");
+(function(e, a) { for(var i in a) e[i] = a[i]; }(exports, /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// identity function for calling harmony imports with the correct context
+/******/ 	__webpack_require__.i = function(value) { return value; };
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports) {
+
+module.exports = require("@exoplay/exobot");
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+module.exports = require("discord.js");
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_discord_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_discord_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_discord_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__exoplay_exobot___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__);
+/* harmony export (binding) */ __webpack_require__.d(exports, "default", function() { return DiscordAdapter; });
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || !1; descriptor.configurable = !0; if ("value" in descriptor) descriptor.writable = !0; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === void 0) { var parent = Object.getPrototypeOf(object); if (parent === null) { return; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === void 0) { return; } return getter.call(receiver); } };
+
+var _class, _temp;
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg), value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: !1, writable: !0, configurable: !0 } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+
+const EVENTS = {
+  ready: 'discordReady',
+  message: 'discordMessage',
+  //presence: 'discordPresence',
+  reconnecting: 'discordReconnecting'
+};
+/* harmony export (immutable) */ exports["EVENTS"] = EVENTS;
+
+
+const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
+/* harmony export (immutable) */ exports["DISCORD_MENTION_REGEX"] = DISCORD_MENTION_REGEX;
+
+
+let DiscordAdapter = (_temp = _class = function (_Adapter) {
+  _inherits(DiscordAdapter, _Adapter);
+
+  function DiscordAdapter({ token, botId, username, adapterName, roleMapping }) {
+    _classCallCheck(this, DiscordAdapter);
+
+    var _this = _possibleConstructorReturn(this, (DiscordAdapter.__proto__ || Object.getPrototypeOf(DiscordAdapter)).apply(this, arguments));
+
+    _this.channels = {};
+
+    _this.discordReady = () => {
+      _this.status = __WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__["Adapter"].STATUS.CONNECTED;
+
+      _this.bot.emitter.emit('connected', _this.name);
+      _this.bot.log.notice('Connected to Discord.');
+      _this.client.user.game = 'Exobotting';
+
+      _this.client.guilds.forEach(s => {
+        s.member(_this.client.user).nickname = _this.bot.name;
+      });
+    };
+
+    _this.discordReconnecting = () => {
+      _this.status = __WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__["Adapter"].STATUS.DISCONNECTED;
+      _this.bot.log.critical('Reconnecting to Discord.');
+    };
+
+    _this.name = adapterName || _this.name;
+    _this.botId = botId;
+    _this.username = username;
+    _this.token = token;
+    return _this;
+  }
+
+  _createClass(DiscordAdapter, [{
+    key: 'register',
+    value: function register(bot) {
+      _get(DiscordAdapter.prototype.__proto__ || Object.getPrototypeOf(DiscordAdapter.prototype), 'register', this).apply(this, arguments);
+      const { token, botId, username } = this;
+
+      if (!token || !botId || !username) {
+        this.status = __WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__["Adapter"].STATUS.ERROR;
+        bot.log.error('token, botId, and username are required to connect to discord.');
+        return;
+      }
+
+      this.client = new __WEBPACK_IMPORTED_MODULE_0_discord_js___default.a.Client();
+      Object.keys(EVENTS).forEach(discordEvent => {
+        const mappedFn = this[EVENTS[discordEvent]];
+        this.client.on(discordEvent, (...args) => mappedFn.bind(this)(...args));
+        this.client.on(discordEvent, (...args) => {
+          this.bot.emitter.emit(`discord-${ discordEvent }`, ...args);
+        });
+      });
+
+      this.client.login(token);
+    }
+  }, {
+    key: 'send',
+    value: function send(message) {
+      this.bot.log.debug(`Sending ${ message.text } to ${ message.channel }`);
+      message.channel.sendMessage(message.text);
+    }
+  }, {
+    key: 'getUserIdByUserName',
+    value: (() => {
+      var _ref = _asyncToGenerator(function* (name) {
+        const user = this.client.users.find('username', name);
+        if (user) {
+          let botUser;
+          try {
+            botUser = yield this.getUser(user.id, user.username, user);
+          } catch (err) {
+            this.bot.log.warn(err);
+          }
+          return botUser.id;
+        }
+      });
+
+      function getUserIdByUserName(_x) {
+        return _ref.apply(this, arguments);
+      }
+
+      return getUserIdByUserName;
+    })()
+  }, {
+    key: 'getRoleIdByRoleName',
+    value: function getRoleIdByRoleName(name, message) {
+      const role = message.channel.guild.roles.find('name', name);
+      if (role) {
+        return role.id;
+      }
+    }
+  }, {
+    key: 'getRolesForUser',
+    value: function getRolesForUser(userId) {
+      if (this.roleMapping && this.adapterUsers && this.adapterUsers[userId]) {
+        return this.adapterUsers[userId].roles.filter(role => this.roleMapping[role]).map(role => this.roleMapping[role]);
+      }
+
+      return [];
+    }
+  }, {
+    key: 'discordMessage',
+    value: (() => {
+      var _ref2 = _asyncToGenerator(function* ({ channel, guild, author, content, member }) {
+        if (author.username === this.username) {
+          return;
+        }
+        this.bot.log.debug(content);
+
+        const user = yield this.getUser(author.id, author.username, member || author);
+
+        // if it's a whisper, the channel is in directMessages
+        if (channel.type === 'dm') {
+          return _get(DiscordAdapter.prototype.__proto__ || Object.getPrototypeOf(DiscordAdapter.prototype), 'receiveWhisper', this).call(this, { user, text: content, channel });
+        }
+
+        this.receive({ user, text: content, channel });
+      });
+
+      function discordMessage(_x2) {
+        return _ref2.apply(this, arguments);
+      }
+
+      return discordMessage;
+    })()
+  }, {
+    key: 'getRoles',
+    value: function getRoles(adapterUserId, adapterUser) {
+      if (adapterUser.roles) {
+        return adapterUser.roles.map(role => role.name);
+      }
+
+      return !1;
+    }
+
+    /*
+    discordPresence (username, userId, status, gameName, rawEvent) {
+      if (userId !== this.botId) {
+        const user = new User(username, userId);
+         if (status === 'online') {
+          return super.enter({ user, channel: rawEvent.d.channel_id });
+        } else if (status === 'offline') {
+          return super.leave({ user, channel: rawEvent.d.channel_id });
+        }
+      }
+    }
+    */
+
+  }]);
+
+  return DiscordAdapter;
+}(__WEBPACK_IMPORTED_MODULE_1__exoplay_exobot__["Adapter"]), _class.type = 'discord', _temp);
+
+
+/***/ }
+/******/ ])));
 //# sourceMappingURL=discord.js.map
