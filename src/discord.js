@@ -23,10 +23,10 @@ export default class DiscordAdapter extends Adapter {
 
   channels = {};
 
-  constructor () {
+  constructor() {
     super(...arguments);
     const { token, botId, username } = this.options;
-    console.log(this.options.roleMapping);
+
     this.client = new Discord.Client();
     Object.keys(EVENTS).forEach(discordEvent => {
       const mappedFn = this[EVENTS[discordEvent]];
@@ -39,12 +39,12 @@ export default class DiscordAdapter extends Adapter {
     this.client.login(token);
   }
 
-  send (message) {
+  send(message) {
     this.bot.log.debug(`Sending ${message.text} to ${message.channel}`);
     message.channel.sendMessage(message.text);
   }
 
-  async getUserIdByUserName (name) {
+  async getUserIdByUserName(name) {
     const user = this.client.users.find('username',name);
     if (user) {
       let botUser;
@@ -59,7 +59,7 @@ export default class DiscordAdapter extends Adapter {
     return;
   }
 
-  getRoleIdByRoleName (name, message) {
+  getRoleIdByRoleName(name, message) {
     const role = message.channel.guild.roles.find('name', name);
     if (role) {
       return role.id;
@@ -68,7 +68,7 @@ export default class DiscordAdapter extends Adapter {
     return;
   }
 
-  getRolesForUser (userId) {
+  getRolesForUser(userId) {
     if (this.roleMapping && this.adapterUsers && this.adapterUsers[userId]) {
       return this.adapterUsers[userId].roles
         .filter(role => this.roleMapping[role])
@@ -95,7 +95,7 @@ export default class DiscordAdapter extends Adapter {
     this.bot.log.critical('Reconnecting to Discord.');
   }
 
-  async discordMessage ({ channel, author, cleanContent, member }) {
+  async discordMessage({ channel, author, cleanContent, member }) {
     if (author.username === this.options.username) { return; }
     this.bot.log.debug(cleanContent);
 
