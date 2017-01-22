@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 
-import { Adapter, AdapterOperationTypes as AT } from '@exoplay/exobot';
+import { Adapter, AdapterOperationTypes as AT, PropTypes as T } from '@exoplay/exobot';
 
 export const EVENTS = {
   ready: 'discordReady',
@@ -14,26 +14,19 @@ export const DISCORD_MENTION_REGEX = /<@!(\d+)>/i;
 export default class DiscordAdapter extends Adapter {
   static type = 'discord';
 
+  static propTypes = {
+    botId: T.string,
+    username: T.string.isRequired,
+    token: T.string.isRequired,
+    roleMapping: T.object,
+  };
+
   channels = {};
 
-  constructor ({ token, botId, username, adapterName }) {
+  constructor () {
     super(...arguments);
-    this.name = adapterName || this.name;
-    this.botId = botId;
-    this.username = username;
-    this.token = token;
-  }
-
-  register (bot) {
-    super.register(...arguments);
-    const { token, botId, username } = this;
-
-    if (!token || !botId || !username) {
-      this.status = Adapter.STATUS.ERROR;
-      bot.log.error('token, botId, and username are required to connect to discord.');
-      return;
-    }
-
+    const { token, botId, username } = this.options;
+    console.log(this.options.roleMapping);
     this.client = new Discord.Client();
     Object.keys(EVENTS).forEach(discordEvent => {
       const mappedFn = this[EVENTS[discordEvent]];
@@ -103,7 +96,7 @@ export default class DiscordAdapter extends Adapter {
   }
 
   async discordMessage ({ channel, author, cleanContent, member }) {
-    if (author.username === this.username) { return; }
+    if (author.username === this.options.username) { return; }
     this.bot.log.debug(cleanContent);
 
     const user = await this.getUser(author.id, author.username, member || author);
