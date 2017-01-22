@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "@exoplay/exobot-build": "^0.2.1",
-    "@exoplay/exobot": "4.x"
+    "@exoplay/exobot": ">= 4.1 < 5"
   }
 }
