@@ -25,7 +25,7 @@ export default class DiscordAdapter extends Adapter {
 
   constructor() {
     super(...arguments);
-    const { token, botId, username } = this.options;
+    const { token } = this.options;
 
     this.client = new Discord.Client();
     Object.keys(EVENTS).forEach(discordEvent => {
@@ -137,53 +137,49 @@ export default class DiscordAdapter extends Adapter {
     }
   }
 
-  kickUser(adapterName, options) {
+  async kickUser(adapterName, options) {
     if (!adapterName || adapterName === this.name) {
       const adapterUserId = this.getAdapterUserIdById(options.userId);
       if (adapterUserId) {
         options.messageText = `You are being kicked due to ${options.messageText}`;
-        this.client.fetchUser(adapterUserId)
-          .then(user => {
-            user.sendMessage(options.messageText)
-              .then(() => {
-                this.client.guilds.map(g => {
-                  g.fetchMember(user)
-                    .then(member => {
-                      member.kick()
-                      .catch(reason => {this.bot.log.warning(reason.response.text);});
-                    })
-                    .catch(reason => {this.bot.log.warning(reason.response.text);});
-                });
-
-              })
-              .catch(reason => {this.bot.log.warning(reason.response.text);});
+        try {
+          const user = await this.client.fetchUser(adapterUserId);
+          await user.sendMessage(options.messageText);
+          const members = await Promise.all(this.client.guilds.map(g => g.fetchMember(user)));
+          members.forEach(m => {
+            m.kick();
           });
+        } catch (err) {
+          if (err.response) {
+            this.bot.log.warning(err.response.text);
+          } else {
+            this.bot.log.warning(err);
+          }
+        }
       }
 
     }
   }
 
-  banUser(adapterName, options) {
+  async banUser(adapterName, options) {
     if (!adapterName || adapterName === this.name) {
       const adapterUserId = this.getAdapterUserIdById(options.userId);
       if (adapterUserId) {
         options.messageText = `You are being banned due to ${options.messageText}`;
-        this.client.fetchUser(adapterUserId)
-          .then(user => {
-            user.sendMessage(options.messageText)
-              .then(() => {
-                this.client.guilds.map(g => {
-                  g.fetchMember(user)
-                    .then(member => {
-                      member.ban()
-                      .catch(reason => {this.bot.log.warning(reason.response.text);});
-                    })
-                    .catch(reason => {this.bot.log.warning(reason.response.text);});
-                });
-
-              })
-              .catch(reason => {this.bot.log.warning(reason.response.text);});
+        try {
+          const user = await this.client.fetchUser(adapterUserId);
+          await user.sendMessage(options.messageText);
+          const members = await Promise.all(this.client.guilds.map(g => g.fetchMember(user)));
+          members.forEach(m => {
+            m.ban();
           });
+        } catch (err) {
+          if (err.response) {
+            this.bot.log.warning(err.response.text);
+          } else {
+            this.bot.log.warning(err);
+          }
+        }
       }
 
     }
