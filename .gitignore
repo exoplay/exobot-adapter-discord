@@ -5,5 +5,6 @@ npm-debug.log
 start.sh
 bin/*
 build/
-example/
+example/discord.example.js
+data/
 /discord.*
