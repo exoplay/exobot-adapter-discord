@@ -6,6 +6,7 @@ export const EVENTS = {
   ready: 'discordReady',
   message: 'discordMessage',
   //presence: 'discordPresence',
+  disconnect: 'discordDisconnect',
   reconnecting: 'discordReconnecting',
 };
 
@@ -83,7 +84,7 @@ export default class DiscordAdapter extends Adapter {
 
     this.bot.emitter.emit('connected', this.name);
     this.bot.log.notice('Connected to Discord.');
-    this.client.user.game = 'Exobotting';
+    this.client.user.setGame('Exobotting');
 
     this.client.guilds.forEach(s => {
       s.member(this.client.user).nickname = this.bot.name;
@@ -93,6 +94,11 @@ export default class DiscordAdapter extends Adapter {
   discordReconnecting = () => {
     this.status = Adapter.STATUS.DISCONNECTED;
     this.bot.log.critical('Reconnecting to Discord.');
+  }
+
+  discordDisconnect = (closeEvent) => {
+    this.status = Adapter.STATUS.DISCONNECTED;
+    this.bot.log.critical(`Disconnected from Discord ${closeEvent.code}: ${closeEvent.reason}`);
   }
 
   async discordMessage({ channel, author, cleanContent, member }) {
