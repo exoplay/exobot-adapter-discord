@@ -20,6 +20,11 @@ export default class DiscordAdapter extends Adapter {
     username: T.string.isRequired,
     token: T.string.isRequired,
     roleMapping: T.object,
+    disabledEvents: T.array,
+  };
+
+  static defaultProps = {
+    disabledEvents: ['TYPING_START'],
   };
 
   channels = {};
@@ -27,8 +32,15 @@ export default class DiscordAdapter extends Adapter {
   constructor() {
     super(...arguments);
     const { token } = this.options;
+    const disabledEvents = this.options.disabledEvents.map((event) => {
+      if (Discord.Constants.WSEvents[event]) {
+        return Discord.Constants.WSEvents[event];
+      }
+    }) || [];
 
-    this.client = new Discord.Client();
+    this.client = new Discord.Client({
+      disabledEvents,
+    });
     Object.keys(EVENTS).forEach(discordEvent => {
       const mappedFn = this[EVENTS[discordEvent]];
       this.client.on(discordEvent, (...args) => mappedFn.bind(this)(...args));
