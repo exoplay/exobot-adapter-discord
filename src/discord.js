@@ -5,7 +5,7 @@ import { Adapter, AdapterOperationTypes as AT, PropTypes as T } from '@exoplay/e
 export const EVENTS = {
   ready: 'discordReady',
   message: 'discordMessage',
-  //presence: 'discordPresence',
+  // presence: 'discordPresence',
   disconnect: 'discordDisconnect',
   reconnecting: 'discordReconnecting',
 };
@@ -21,10 +21,12 @@ export default class DiscordAdapter extends Adapter {
     token: T.string.isRequired,
     roleMapping: T.object,
     disabledEvents: T.array,
+    gameName: T.string,
   };
 
   static defaultProps = {
     disabledEvents: ['TYPING_START'],
+    gameName: 'Exobotting',
   };
 
   channels = {};
@@ -32,16 +34,18 @@ export default class DiscordAdapter extends Adapter {
   constructor() {
     super(...arguments);
     const { token } = this.options;
-    const disabledEvents = this.options.disabledEvents.map((event) => {
+    const disabledEvents = this.options.disabledEvents.filter((event) => {
       if (Discord.Constants.WSEvents[event]) {
-        return Discord.Constants.WSEvents[event];
+        return true;
       }
+
+      return false;
     }) || [];
 
     this.client = new Discord.Client({
       disabledEvents,
     });
-    Object.keys(EVENTS).forEach(discordEvent => {
+    Object.keys(EVENTS).forEach((discordEvent) => {
       const mappedFn = this[EVENTS[discordEvent]];
       this.client.on(discordEvent, (...args) => mappedFn.bind(this)(...args));
       this.client.on(discordEvent, (...args) => {
@@ -58,7 +62,7 @@ export default class DiscordAdapter extends Adapter {
   }
 
   async getUserIdByUserName(name) {
-    const user = this.client.users.find('username',name);
+    const user = this.client.users.find('username', name);
     if (user) {
       let botUser;
       try {
@@ -68,8 +72,6 @@ export default class DiscordAdapter extends Adapter {
       }
       return botUser.id;
     }
-
-    return;
   }
 
   getRoleIdByRoleName(name, message) {
@@ -77,8 +79,6 @@ export default class DiscordAdapter extends Adapter {
     if (role) {
       return role.id;
     }
-
-    return;
   }
 
   getRolesForUser(userId) {
@@ -96,11 +96,16 @@ export default class DiscordAdapter extends Adapter {
 
     this.bot.emitter.emit('connected', this.name);
     this.bot.log.notice('Connected to Discord.');
-    this.client.user.setGame('Exobotting');
+    this.client.user.setGame(this.options.gameName);
 
-    this.client.guilds.forEach(s => {
-      s.member(this.client.user).nickname = this.bot.name;
+    this.client.guilds.forEach((s) => {
+      const member = s.member(this.client.user);
+      member.nickname = this.bot.name;
     });
+  }
+
+  onConfigChange = () => {
+    this.client.user.setGame(this.options.gameName);
   }
 
   discordReconnecting = () => {
@@ -147,9 +152,9 @@ export default class DiscordAdapter extends Adapter {
       const adapterUserId = this.getAdapterUserIdById(options.userId);
       if (adapterUserId) {
         this.client.fetchUser(adapterUserId)
-          .then(user => {
+          .then((user) => {
             user.sendMessage(options.messageText)
-            .catch(reason => {this.bot.log.warning(reason.response.text);});
+            .catch((reason) => { this.bot.log.warning(reason.response.text); });
           });
       }
     }
@@ -159,12 +164,12 @@ export default class DiscordAdapter extends Adapter {
     if (!adapterName || adapterName === this.name) {
       const adapterUserId = this.getAdapterUserIdById(options.userId);
       if (adapterUserId) {
-        options.messageText = `You are being kicked due to ${options.messageText}`;
+        const messageText = `You are being kicked due to ${options.messageText}`;
         try {
           const user = await this.client.fetchUser(adapterUserId);
-          await user.sendMessage(options.messageText);
+          await user.sendMessage(messageText);
           const members = await Promise.all(this.client.guilds.map(g => g.fetchMember(user)));
-          members.forEach(m => {
+          members.forEach((m) => {
             m.kick();
           });
         } catch (err) {
@@ -175,7 +180,6 @@ export default class DiscordAdapter extends Adapter {
           }
         }
       }
-
     }
   }
 
@@ -183,12 +187,12 @@ export default class DiscordAdapter extends Adapter {
     if (!adapterName || adapterName === this.name) {
       const adapterUserId = this.getAdapterUserIdById(options.userId);
       if (adapterUserId) {
-        options.messageText = `You are being banned due to ${options.messageText}`;
+        const messageText = `You are being banned due to ${options.messageText}`;
         try {
           const user = await this.client.fetchUser(adapterUserId);
-          await user.sendMessage(options.messageText);
+          await user.sendMessage(messageText);
           const members = await Promise.all(this.client.guilds.map(g => g.fetchMember(user)));
-          members.forEach(m => {
+          members.forEach((m) => {
             m.ban();
           });
         } catch (err) {
@@ -199,7 +203,6 @@ export default class DiscordAdapter extends Adapter {
           }
         }
       }
-
     }
   }
 
