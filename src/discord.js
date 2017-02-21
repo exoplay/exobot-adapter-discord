@@ -34,13 +34,8 @@ export default class DiscordAdapter extends Adapter {
   constructor() {
     super(...arguments);
     const { token } = this.options;
-    const disabledEvents = this.options.disabledEvents.filter((event) => {
-      if (Discord.Constants.WSEvents[event]) {
-        return true;
-      }
-
-      return false;
-    }) || [];
+    const disabledEvents = this.options.disabledEvents
+      .filter(event => Discord.Constants.WSEvents[event]) || [];
 
     this.client = new Discord.Client({
       disabledEvents,
